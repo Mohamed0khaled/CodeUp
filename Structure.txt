@@ -1,0 +1,24 @@
+/lib
+ ├── main.dart
+ ├── routes.dart
+ ├── screens
+ │   ├── splash/
+ │   ├── onboarding/
+ │   ├── auth/
+ │   ├── home/
+ │   ├── competitions/
+ │   ├── play/
+ │   ├── quiz/
+ │   ├── leaderboard/
+ │   ├── rewards/
+ │   ├── shop/
+ │   ├── friends/
+ │   ├── notifications/
+ │   ├── profile/
+ │   ├── settings/
+ ├── widgets/
+ ├── models/
+ ├── controllers/
+ ├── services/
+ └── utils/
+

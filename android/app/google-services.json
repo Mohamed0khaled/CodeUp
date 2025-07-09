@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "538015548724",
+    "project_id": "codeup-1e29c",
+    "storage_bucket": "codeup-1e29c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538015548724:android:42ecf1a8ffc378a2101161",
+        "android_client_info": {
+          "package_name": "com.example.codeup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538015548724-qrftl9jn3fo2ffr1ics3bi04ubh1g1m4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.codeup",
+            "certificate_hash": "a2b96d03ba22d093b54931e5b35210cbe6e63a1e"
+          }
+        },
+        {
+          "client_id": "538015548724-kub065fhkvpci598vsns8qs526du2osa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUiZ5PbqiH9zkSazNPYaH65VEX7yCQbng"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538015548724-kub065fhkvpci598vsns8qs526du2osa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "538015548724-vrmav8c5uvsh92cccmu7iaieqno4o8kh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.codeup"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
