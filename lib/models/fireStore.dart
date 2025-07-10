@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
+import 'package:codeup/models/user_data.dart';
 
 /// 🔥 Firebase Firestore Service
 /// 
@@ -246,24 +247,29 @@ class FirestoreService {
   /// Get user settings
   Future<Map<String, dynamic>?> getUserSettings(String uid) async {
     try {
-      final doc = await _firestore.collection('user_settings').doc(uid).get();
-      return doc.exists ? doc.data() : null;
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['settings'] as Map<String, dynamic>?;
+      }
+      return null;
     } catch (e) {
       _logger.e('Error getting user settings: $e');
-      throw FirestoreException('Failed to get user settings: $e');
+      return null;
     }
   }
-
-  /// Update specific setting
-  Future<void> updateUserSetting(String uid, String settingPath, dynamic value) async {
+  
+  /// Update user setting
+  Future<void> updateUserSetting(String uid, String key, dynamic value) async {
     try {
-      await _firestore.collection('user_settings').doc(uid).update({
-        settingPath: value,
+      await _firestore.collection('users').doc(uid).update({
+        'settings.$key': value,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      _logger.i('User setting updated: $key = $value');
     } catch (e) {
       _logger.e('Error updating user setting: $e');
-      throw FirestoreException('Failed to update setting: $e');
+      rethrow;
     }
   }
 
@@ -996,107 +1002,4 @@ class FirestoreException implements Exception {
   String toString() => 'FirestoreException: $message';
 }
 
-/// User data model for easier handling
-class UserData {
-  final String uid;
-  final String email;
-  final String? username;
-  final String? displayName;
-  final String? profileImageUrl;
-  final String? userLevel;
-  final int xpPoints;
-  final bool isPremiumUser;
-  final bool isVerified;
-  final DateTime? createdAt;
-  final DateTime? lastActiveAt;
 
-  UserData({
-    required this.uid,
-    required this.email,
-    this.username,
-    this.displayName,
-    this.profileImageUrl,
-    this.userLevel,
-    this.xpPoints = 0,
-    this.isPremiumUser = false,
-    this.isVerified = false,
-    this.createdAt,
-    this.lastActiveAt,
-  });
-
-  factory UserData.fromFirestore(Map<String, dynamic> data) {
-    return UserData(
-      uid: data['uid'] ?? '',
-      email: data['email'] ?? '',
-      username: data['username'],
-      displayName: data['displayName'],
-      profileImageUrl: data['profileImageUrl'],
-      userLevel: data['userLevel'],
-      xpPoints: data['xpPoints'] ?? 0,
-      isPremiumUser: data['isPremiumUser'] ?? false,
-      isVerified: data['isVerified'] ?? false,
-      createdAt: data['createdAt']?.toDate(),
-      lastActiveAt: data['lastActiveAt']?.toDate(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'email': email,
-      'username': username,
-      'displayName': displayName,
-      'profileImageUrl': profileImageUrl,
-      'userLevel': userLevel,
-      'xpPoints': xpPoints,
-      'isPremiumUser': isPremiumUser,
-      'isVerified': isVerified,
-      'createdAt': createdAt,
-      'lastActiveAt': lastActiveAt,
-    };
-  }
-
-  /// Get the best available profile image URL with priority:
-  /// 1. Custom uploaded image (base64 in Firestore)
-  /// 2. OAuth provider image (stored in profileImageUrl)
-  /// 3. null (will fallback to initials)
-  String? get bestProfileImageUrl {
-    if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
-      return profileImageUrl;
-    }
-    return null;
-  }
-
-  /// Get display text for profile fallback (initials)
-  String get displayText {
-    return displayName ?? username ?? email;
-  }
-
-  UserData copyWith({
-    String? uid,
-    String? email,
-    String? username,
-    String? displayName,
-    String? profileImageUrl,
-    String? userLevel,
-    int? xpPoints,
-    bool? isPremiumUser,
-    bool? isVerified,
-    DateTime? createdAt,
-    DateTime? lastActiveAt,
-  }) {
-    return UserData(
-      uid: uid ?? this.uid,
-      email: email ?? this.email,
-      username: username ?? this.username,
-      displayName: displayName ?? this.displayName,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
-      userLevel: userLevel ?? this.userLevel,
-      xpPoints: xpPoints ?? this.xpPoints,
-      isPremiumUser: isPremiumUser ?? this.isPremiumUser,
-      isVerified: isVerified ?? this.isVerified,
-      createdAt: createdAt ?? this.createdAt,
-      lastActiveAt: lastActiveAt ?? this.lastActiveAt,
-    );
-  }
-}

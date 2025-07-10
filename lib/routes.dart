@@ -1,7 +1,13 @@
 import 'package:codeup/controllers/auth/authController.dart';
 import 'package:codeup/screens/auth/login.dart';
+import 'package:codeup/screens/auth/signup.dart';
+import 'package:codeup/screens/auth/profileSetup.dart';
 import 'package:codeup/screens/dashboard/dashboard.dart';
 import 'package:codeup/screens/splash/splash.dart';
+import 'package:codeup/screens/match/match_lobby.dart';
+import 'package:codeup/screens/match/waiting_room.dart';
+import 'package:codeup/screens/leagues/leagues_screen.dart';
+import 'package:codeup/screens/leagues/tournament_details.dart';
 import 'package:codeup/services/firebaseOption.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,7 +18,13 @@ class AppRoutes {
   // Route names
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String signup = '/signup';
+  static const String profileSetup = '/profile-setup';
   static const String dashboard = '/dashboard';
+  static const String matchLobby = '/match-lobby';
+  static const String waitingRoom = '/waiting-room';
+  static const String leagues = '/leagues';
+  static const String tournamentDetails = '/tournament-details';
   static const String home = '/home'; // For future use
 
   // Initial route
@@ -35,10 +47,53 @@ class AppRoutes {
       transitionDuration: const Duration(milliseconds: 600),
     ),
     GetPage(
+      name: signup,
+      page: () => const SignupPage(),
+      binding: LoginBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: profileSetup,
+      page: () => const ProfileSetupPage(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
       name: '/dashboard',
       page: () => const DashBoard(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: matchLobby,
+      page: () => const MatchLobbyScreen(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: waitingRoom,
+      page: () {
+        final String roomCode = Get.arguments?['roomCode'] ?? 'DEV123';
+        return WaitingRoomScreen(roomCode: roomCode);
+      },
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: leagues,
+      page: () => const LeaguesScreen(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: tournamentDetails,
+      page: () {
+        final int tournamentId = Get.arguments?['tournamentId'] ?? 1;
+        return TournamentDetailsScreen(tournamentId: tournamentId);
+      },
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
     ),
   ];
 }
@@ -128,6 +183,41 @@ class RouteHelper {
   /// Navigate to login screen
   static void goToLogin() {
     Get.toNamed(AppRoutes.login);
+  }
+
+  /// Navigate to signup screen
+  static void goToSignup() {
+    Get.toNamed(AppRoutes.signup);
+  }
+
+  /// Navigate to profile setup screen
+  static void goToProfileSetup() {
+    Get.toNamed(AppRoutes.profileSetup);
+  }
+
+  /// Navigate to match lobby screen
+  static void goToMatchLobby() {
+    Get.toNamed(AppRoutes.matchLobby);
+  }
+
+  /// Navigate to waiting room screen
+  static void goToWaitingRoom({required String roomCode}) {
+    Get.toNamed(AppRoutes.waitingRoom, arguments: {'roomCode': roomCode});
+  }
+
+  /// Navigate to leagues screen
+  static void goToLeagues() {
+    Get.toNamed(AppRoutes.leagues);
+  }
+
+  /// Navigate to tournament details screen
+  static void goToTournamentDetails({required int tournamentId}) {
+    Get.toNamed(AppRoutes.tournamentDetails, arguments: {'tournamentId': tournamentId});
+  }
+
+  /// Navigate to home tab in dashboard
+  static void goToHome() {
+    Get.toNamed(AppRoutes.dashboard);
   }
 
   /// Navigate to dashboard screen

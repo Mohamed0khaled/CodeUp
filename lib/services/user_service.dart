@@ -1,4 +1,5 @@
 import 'package:codeup/models/fireStore.dart';
+import 'package:codeup/models/user_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -553,6 +554,31 @@ class UserService extends GetxService {
     }
   }
   
+  /// Load user settings
+  Future<void> loadUserSettings() async {
+    try {
+      if (!isAuthenticated) return;
+      
+      final settings = await _firestoreService.getUserSettings(currentUserId!) ?? {};
+      _userSettings.addAll(settings);
+    } catch (e) {
+      debugPrint('Error loading user settings: $e');
+    }
+  }
+  
+  /// Update a specific user setting
+  Future<void> updateUserSetting(String key, dynamic value) async {
+    try {
+      if (!isAuthenticated) return;
+      
+      await _firestoreService.updateUserSetting(currentUserId!, key, value);
+      _userSettings[key] = value;
+    } catch (e) {
+      debugPrint('Error updating user setting: $e');
+      rethrow;
+    }
+  }
+
   // ====================================================================
   // USER ACTIVITY METHODS
   // ====================================================================
@@ -867,7 +893,7 @@ class UserService extends GetxService {
     
     try {
       final backupData = {
-        'profile': _currentUser.value?.toMap(),
+        'profile': _currentUser.value?.toFirestore(),
         'settings': _userSettings,
         'activity': _userActivity,
         'social': _userSocial,

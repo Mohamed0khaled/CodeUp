@@ -1,5 +1,5 @@
+import 'package:codeup/models/user_data.dart';
 import 'package:codeup/services/user_service.dart';
-import 'package:codeup/models/fireStore.dart';
 import 'package:codeup/widgets/profile_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -9,8 +9,6 @@ import 'dart:async';
 
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
   // Set up global error handling
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -20,6 +18,8 @@ void main() async {
   
   // Handle async errors
   runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    
     // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

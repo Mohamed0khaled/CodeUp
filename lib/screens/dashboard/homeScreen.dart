@@ -1,5 +1,7 @@
 import 'package:codeup/services/user_service.dart';
 import 'package:codeup/widgets/profile_image_widget.dart';
+import 'package:codeup/screens/match/match_lobby.dart';
+import 'package:codeup/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -326,7 +328,9 @@ class _HomeScreenState extends State<HomeScreen>
                   gradient: const LinearGradient(
                     colors: [Color(0xFF3B82F6), Color(0xFF06B6D4)],
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Get.to(() => const MatchLobbyScreen());
+                  },
                 ),
               );
             },
@@ -341,7 +345,9 @@ class _HomeScreenState extends State<HomeScreen>
             gradient: const LinearGradient(
               colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
             ),
-            onTap: () {},
+            onTap: () {
+              RouteHelper.goToLeagues();
+            },
           ),
         ),
       ],
