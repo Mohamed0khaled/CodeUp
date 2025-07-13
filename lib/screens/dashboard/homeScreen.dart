@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen>
                       userService.displayName,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     )),
@@ -229,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen>
                       color: Color(0xFF06B6D4),
                       size: 20,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 2),
                     Obx(() => Text(
                       '${userService.xpForNextRank} to next',
                       style: const TextStyle(
@@ -275,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen>
               Obx(() => Text(
                 userService.xpForNextRank > 0 
                     ? '${userService.xpForNextRank} XP needed'
-                    : 'Top rank achieved!',
+                    : 'Top rank',
                 style: const TextStyle(
                   color: Color(0xFF06B6D4),
                   fontSize: 14,
@@ -471,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen>
             label,
             style: const TextStyle(
               color: Colors.white60,
-              fontSize: 12,
+              fontSize: 10,
             ),
           ),
         ],

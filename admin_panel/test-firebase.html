@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Connection Test</h1>
+    <button id="testBtn">Test Firebase Connection</button>
+    <button id="addTestTournament">Add Test Tournament</button>
+    <div id="result"></div>
+    
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYwnVWpRfmtC16xji-4opY2enU45jOP6g",
+            authDomain: "codeup-1e29c.firebaseapp.com",
+            projectId: "codeup-1e29c",
+            storageBucket: "codeup-1e29c.firebasestorage.app",
+            messagingSenderId: "538015548724",
+            appId: "1:538015548724:web:0442f8eb2f1af157101161",
+            measurementId: "G-CKK1NWQ545"
+        };
+        
+        // Initialize Firebase
+        console.log('Initializing Firebase...');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log('Firebase initialized successfully');
+        
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            try {
+                console.log('Testing Firestore connection...');
+                const querySnapshot = await getDocs(collection(db, 'tournaments'));
+                resultDiv.innerHTML = `<p style="color: green;">✅ Firebase connected successfully! Found ${querySnapshot.size} tournaments.</p>`;
+                console.log('Firestore test successful');
+            } catch (error) {
+                console.error('Firestore test failed:', error);
+                resultDiv.innerHTML = `<p style="color: red;">❌ Firebase connection failed: ${error.message}</p>`;
+            }
+        });
+        
+        document.getElementById('addTestTournament').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            try {
+                console.log('Adding test tournament...');
+                const testTournament = {
+                    title: 'Test Tournament',
+                    subtitle: 'This is a test',
+                    startDate: new Date().toISOString().slice(0, 16),
+                    duration: 2,
+                    prizePool: 1000,
+                    maxParticipants: 50,
+                    difficulty: 'Medium',
+                    language: 'Any',
+                    description: 'Test tournament description',
+                    rules: ['Test rule 1', 'Test rule 2'],
+                    prizes: {
+                        first: 50,
+                        second: 30,
+                        third: 20
+                    },
+                    participants: 0,
+                    status: 'open',
+                    subscribers: [],
+                    createdAt: serverTimestamp()
+                };
+                
+                const docRef = await addDoc(collection(db, 'tournaments'), testTournament);
+                console.log('Test tournament added with ID:', docRef.id);
+                resultDiv.innerHTML = `<p style="color: green;">✅ Test tournament created successfully! ID: ${docRef.id}</p>`;
+            } catch (error) {
+                console.error('Failed to add test tournament:', error);
+                resultDiv.innerHTML = `<p style="color: red;">❌ Failed to add tournament: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

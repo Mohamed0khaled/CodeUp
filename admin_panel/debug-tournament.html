@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Admin Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 5px; background: #333; color: white; border: 1px solid #555; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #555; background: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tournament Creation Debug</h1>
+        
+        <form id="debugForm">
+            <div class="form-group">
+                <label>Title:</label>
+                <input type="text" id="title" value="Debug Tournament" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Subtitle:</label>
+                <input type="text" id="subtitle" value="Debug Subtitle" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Start Date:</label>
+                <input type="datetime-local" id="startDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Duration (hours):</label>
+                <input type="number" id="duration" value="2" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Prize Pool ($):</label>
+                <input type="number" id="prizePool" value="1000" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Max Participants:</label>
+                <input type="number" id="maxParticipants" value="50" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Difficulty:</label>
+                <select id="difficulty" required>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Expert">Expert</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Language:</label>
+                <input type="text" id="language" value="Any" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="description" required>This is a debug tournament</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Rules (one per line):</label>
+                <textarea id="rules">Rule 1: Be respectful
+Rule 2: No cheating</textarea>
+            </div>
+            
+            <h3>Prize Distribution</h3>
+            <div class="form-group">
+                <label>1st Place (%):</label>
+                <input type="number" id="firstPrize" value="50" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>2nd Place (%):</label>
+                <input type="number" id="secondPrize" value="30" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>3rd Place (%):</label>
+                <input type="number" id="thirdPrize" value="20" min="0" max="100">
+            </div>
+            
+            <button type="submit">Create Tournament</button>
+        </form>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYwnVWpRfmtC16xji-4opY2enU45jOP6g",
+            authDomain: "codeup-1e29c.firebaseapp.com",
+            projectId: "codeup-1e29c",
+            storageBucket: "codeup-1e29c.firebasestorage.app",
+            messagingSenderId: "538015548724",
+            appId: "1:538015548724:web:0442f8eb2f1af157101161",
+            measurementId: "G-CKK1NWQ545"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Set default start date to now
+        document.getElementById('startDate').value = new Date().toISOString().slice(0, 16);
+        
+        document.getElementById('debugForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Validate prize distribution
+                const first = parseInt(document.getElementById('firstPrize').value) || 0;
+                const second = parseInt(document.getElementById('secondPrize').value) || 0;
+                const third = parseInt(document.getElementById('thirdPrize').value) || 0;
+                const total = first + second + third;
+                
+                if (total !== 100) {
+                    resultDiv.innerHTML = `<p style="color: red;">❌ Prize distribution must total 100%. Current total: ${total}%</p>`;
+                    return;
+                }
+                
+                // Collect form data
+                const formData = {
+                    title: document.getElementById('title').value,
+                    subtitle: document.getElementById('subtitle').value,
+                    startDate: document.getElementById('startDate').value,
+                    duration: parseInt(document.getElementById('duration').value),
+                    prizePool: parseInt(document.getElementById('prizePool').value),
+                    maxParticipants: parseInt(document.getElementById('maxParticipants').value),
+                    difficulty: document.getElementById('difficulty').value,
+                    language: document.getElementById('language').value,
+                    description: document.getElementById('description').value,
+                    rules: document.getElementById('rules').value.split('\n').filter(rule => rule.trim()),
+                    prizes: {
+                        first: first,
+                        second: second,
+                        third: third
+                    },
+                    participants: 0,
+                    status: 'open',
+                    subscribers: [],
+                    createdAt: serverTimestamp()
+                };
+                
+                console.log('Creating tournament with data:', formData);
+                resultDiv.innerHTML = '<p style="color: yellow;">⏳ Creating tournament...</p>';
+                
+                const docRef = await addDoc(collection(db, 'tournaments'), formData);
+                console.log('Tournament created with ID:', docRef.id);
+                resultDiv.innerHTML = `<p style="color: green;">✅ Tournament created successfully! ID: ${docRef.id}</p>`;
+                
+            } catch (error) {
+                console.error('Error creating tournament:', error);
+                resultDiv.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

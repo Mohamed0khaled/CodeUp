@@ -89,7 +89,7 @@ class AppRoutes {
     GetPage(
       name: tournamentDetails,
       page: () {
-        final int tournamentId = Get.arguments?['tournamentId'] ?? 1;
+        final String tournamentId = (Get.arguments?['tournamentId'] ?? '1').toString();
         return TournamentDetailsScreen(tournamentId: tournamentId);
       },
       transition: Transition.rightToLeftWithFade,
@@ -211,7 +211,7 @@ class RouteHelper {
   }
 
   /// Navigate to tournament details screen
-  static void goToTournamentDetails({required int tournamentId}) {
+  static void goToTournamentDetails({required String tournamentId}) {
     Get.toNamed(AppRoutes.tournamentDetails, arguments: {'tournamentId': tournamentId});
   }
 

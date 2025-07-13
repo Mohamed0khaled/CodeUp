@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:codeup/routes.dart';
+import 'package:codeup/services/tournament_service.dart';
 import 'dart:math';
 
 class LeaguesScreen extends StatefulWidget {
@@ -23,8 +24,9 @@ class _LeaguesScreenState extends State<LeaguesScreen>
   late Animation<double> _shimmerAnimation;
   late Animation<double> _floatingAnimation;
 
-  // Mock league data
-  final List<Map<String, dynamic>> _leagues = [
+  final TournamentService _tournamentService = Get.find<TournamentService>();
+
+  final List<Map<String, dynamic>> tournaments = [
     {
       'id': 1,
       'title': 'Algorithm Sprint',
@@ -55,7 +57,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
         {'name': 'CodeMaster', 'rank': 2847, 'level': 12},
         {'name': 'AlgoQueen', 'rank': 1653, 'level': 15},
         {'name': 'ByteNinja', 'rank': 892, 'level': 18},
-      ]
+      ],
     },
     {
       'id': 2,
@@ -87,7 +89,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
         {'name': 'TreeMaster', 'rank': 1234, 'level': 20},
         {'name': 'GraphGuru', 'rank': 567, 'level': 22},
         {'name': 'HashHero', 'rank': 2341, 'level': 16},
-      ]
+      ],
     },
     {
       'id': 3,
@@ -119,7 +121,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
         {'name': 'ReactRanger', 'rank': 445, 'level': 25},
         {'name': 'NodeNinja', 'rank': 1123, 'level': 19},
         {'name': 'VueVirtuoso', 'rank': 778, 'level': 21},
-      ]
+      ],
     },
     {
       'id': 4,
@@ -151,7 +153,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
         {'name': 'FlutterFly', 'rank': 223, 'level': 28},
         {'name': 'ReactRocket', 'rank': 334, 'level': 26},
         {'name': 'DartDevil', 'rank': 156, 'level': 30},
-      ]
+      ],
     },
   ];
 
@@ -451,26 +453,39 @@ class _LeaguesScreenState extends State<LeaguesScreen>
   }
 
   Widget _buildLeaguesGrid() {
-    return Column(
-      children: _leagues.map((league) => Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: _buildLeagueCard(league),
-      )).toList(),
-    );
+    return Obx(() {
+      if (_tournamentService.isLoading.value) {
+        return _buildLoadingGrid();
+      }
+      
+      if (_tournamentService.tournaments.isEmpty) {
+        return _buildEmptyState();
+      }
+      
+      return Column(
+        children: _tournamentService.tournaments.map((tournament) => Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: _buildLeagueCard(tournament),
+        )).toList(),
+      );
+    });
   }
 
-  Widget _buildLeagueCard(Map<String, dynamic> league) {
+  Widget _buildLeagueCard(Map<String, dynamic> tournament) {
+    // Get gradient colors based on difficulty
+    List<Color> gradientColors = _getGradientForDifficulty(tournament['difficulty'] ?? 'Medium');
+    
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        RouteHelper.goToTournamentDetails(tournamentId: league['id']);
+        RouteHelper.goToTournamentDetails(tournamentId: tournament['id']);
       },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: (league['gradient'][0] as Color).withOpacity(0.3),
+              color: gradientColors[0].withOpacity(0.3),
               blurRadius: 20,
               spreadRadius: 2,
               offset: const Offset(0, 4),
@@ -488,7 +503,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: league['gradient'],
+                    colors: gradientColors,
                   ),
                 ),
               ),
@@ -535,7 +550,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            league['icon'],
+                            _getIconForDifficulty(tournament['difficulty'] ?? 'Medium'),
                             color: Colors.white,
                             size: 24,
                           ),
@@ -544,20 +559,20 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: league['status'] == 'Open' 
+                            color: (tournament['status'] ?? 'open') == 'open' 
                                 ? const Color(0xFF10B981).withOpacity(0.2)
                                 : const Color(0xFFF59E0B).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: league['status'] == 'Open' 
+                              color: (tournament['status'] ?? 'open') == 'open' 
                                   ? const Color(0xFF10B981)
                                   : const Color(0xFFF59E0B),
                             ),
                           ),
                           child: Text(
-                            league['status'],
+                            (tournament['status'] ?? 'open').toUpperCase(),
                             style: TextStyle(
-                              color: league['status'] == 'Open' 
+                              color: (tournament['status'] ?? 'open') == 'open' 
                                   ? const Color(0xFF10B981)
                                   : const Color(0xFFF59E0B),
                               fontSize: 12,
@@ -572,7 +587,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                     
                     // Title and subtitle
                     Text(
-                      league['title'],
+                      tournament['title'] ?? 'Tournament',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -581,7 +596,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      league['subtitle'],
+                      tournament['subtitle'] ?? 'Coding Challenge',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.8),
                         fontSize: 14,
@@ -616,7 +631,7 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '\$${league['prizePool'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                                '\$${(tournament['prizePool'] ?? 0).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -649,10 +664,10 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${league['participants']}/${league['maxParticipants']}',
+                                '${tournament['participants'] ?? 0}/${tournament['maxParticipants'] ?? 100}',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -664,56 +679,148 @@ class _LeaguesScreenState extends State<LeaguesScreen>
                     
                     const SizedBox(height: 16),
                     
-                    // Time countdown
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                    // Details row
+                    Row(
+                      children: [
+                        _buildDetailChip(
+                          Icons.schedule,
+                          '${tournament['duration'] ?? 3}h',
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.schedule,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Starts in: ',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            '${league['timeLeft']['days']}d ${league['timeLeft']['hours']}h ${league['timeLeft']['minutes']}m',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            league['difficulty'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 8),
+                        _buildDetailChip(
+                          Icons.signal_cellular_alt,
+                          tournament['difficulty'] ?? 'Medium',
+                        ),
+                        const SizedBox(width: 8),
+                        _buildDetailChip(
+                          Icons.code,
+                          tournament['language'] ?? 'Any',
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  List<Color> _getGradientForDifficulty(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return [const Color(0xFF10B981), const Color(0xFF06B6D4)];
+      case 'medium':
+        return [const Color(0xFF3B82F6), const Color(0xFF06B6D4)];
+      case 'hard':
+        return [const Color(0xFF8B5CF6), const Color(0xFFEC4899)];
+      case 'expert':
+        return [const Color(0xFFEF4444), const Color(0xFFF59E0B)];
+      default:
+        return [const Color(0xFF3B82F6), const Color(0xFF06B6D4)];
+    }
+  }
+
+  IconData _getIconForDifficulty(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return Icons.star_outline;
+      case 'medium':
+        return Icons.speed;
+      case 'hard':
+        return Icons.account_tree;
+      case 'expert':
+        return Icons.emoji_events;
+      default:
+        return Icons.speed;
+    }
+  }
+
+  Widget _buildDetailChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingGrid() {
+    return Column(
+      children: List.generate(3, (index) => Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: _buildLoadingCard(),
+      )),
+    );
+  }
+
+  Widget _buildLoadingCard() {
+    return Container(
+      height: 280,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF2D3748),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF06B6D4),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF2D3748),
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.emoji_events_outlined,
+              size: 64,
+              color: Color(0xFF64748B),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'No Tournaments Available',
+              style: TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Check back later for new tournaments',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );

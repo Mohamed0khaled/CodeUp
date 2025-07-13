@@ -1,6 +1,7 @@
 import 'package:codeup/routes.dart';
 import 'package:codeup/services/firebaseOption.dart';
 import 'package:codeup/services/user_service.dart';
+import 'package:codeup/services/tournament_service.dart';
 import 'package:codeup/controllers/auth/authController.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -39,6 +40,9 @@ void main() async {
 Future<void> _initializeServices() async {
   // Initialize User Service first
   Get.put<UserService>(UserService(), permanent: true);
+  
+  // Initialize Tournament Service
+  Get.put<TournamentService>(TournamentService(), permanent: true);
   
   // Initialize Auth Controller after UserService
   Get.put<AuthController>(AuthController(), permanent: true);

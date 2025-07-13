@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:codeup/services/tournament_service.dart';
 import 'dart:math';
 
 class TournamentDetailsScreen extends StatefulWidget {
-  final int tournamentId;
+  final String tournamentId;
   
   const TournamentDetailsScreen({
     Key? key,
@@ -27,43 +28,34 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
   late Animation<double> _countdownAnimation;
   late Animation<double> _floatingAnimation;
 
+  final TournamentService _tournamentService = Get.find<TournamentService>();
+  
   bool _isJoined = false;
   bool _isJoining = false;
-
-  // Mock tournament data - in real app this would come from API
-  Map<String, dynamic> get tournamentData => {
-    'title': 'Algorithm Sprint',
-    'subtitle': 'Weekly coding challenge',
-    'startDate': 'Starts November 15, 2024',
-    'prizePool': 5000,
-    'participants': 128,
-    'maxParticipants': 200,
-    'timeLeft': {'days': 2, 'hours': 14, 'minutes': 37, 'seconds': 42},
-    'gradient': [Color(0xFF3B82F6), Color(0xFF06B6D4)],
-    'prizes': [
-      {'position': '1st Place', 'amount': 2500, 'color': Color(0xFFFFD700), 'icon': Icons.looks_one},
-      {'position': '2nd Place', 'amount': 1500, 'color': Color(0xFFC0C0C0), 'icon': Icons.looks_two},
-      {'position': '3rd Place', 'amount': 1000, 'color': Color(0xFFCD7F32), 'icon': Icons.looks_3},
-    ],
-    'rules': [
-      {'title': 'Duration', 'description': '3 Hours', 'subtitle': 'You have 3 hours to complete all problems.', 'icon': Icons.schedule},
-      {'title': 'Language', 'description': 'Any', 'subtitle': 'Use your preferred programming language.', 'icon': Icons.code},
-      {'title': 'Scoring', 'description': 'Speed + Accuracy', 'subtitle': 'Points are awarded based on completion time and correctness.', 'icon': Icons.speed},
-      {'title': 'Difficulty', 'description': 'Easy to Hard', 'subtitle': 'Problems range from basic to advanced level.', 'icon': Icons.trending_up},
-    ],
-    'participants_list': [
-      {'name': 'CodeMaster', 'rank': 2847, 'level': 12, 'avatar': '👨‍💻', 'badge': 1},
-      {'name': 'AlgoQueen', 'rank': 1653, 'level': 15, 'avatar': '👩‍💻', 'badge': 2},
-      {'name': 'ByteNinja', 'rank': 892, 'level': 18, 'avatar': '🥷', 'badge': 3},
-      {'name': 'JavaJedi', 'rank': 3421, 'level': 10, 'avatar': '⚡', 'badge': null},
-      {'name': 'PythonPro', 'rank': 1789, 'level': 14, 'avatar': '🐍', 'badge': null},
-    ]
-  };
+  Map<String, dynamic>? tournamentData;
 
   @override
   void initState() {
     super.initState();
     _initAnimations();
+    _loadTournamentData();
+    _checkIfJoined();
+  }
+
+  Future<void> _loadTournamentData() async {
+    final data = await _tournamentService.getTournamentById(widget.tournamentId);
+    if (data != null) {
+      setState(() {
+        tournamentData = data;
+      });
+    }
+  }
+
+  Future<void> _checkIfJoined() async {
+    final isJoined = await _tournamentService.hasUserJoinedTournament(widget.tournamentId);
+    setState(() {
+      _isJoined = isJoined;
+    });
   }
 
   void _initAnimations() {
@@ -136,6 +128,17 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (tournamentData == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF1A1D29),
+        body: const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF06B6D4),
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       backgroundColor: const Color(0xFF1A1D29),
       body: Container(
@@ -269,12 +272,12 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: tournamentData['gradient'],
+          colors: _getGradientForDifficulty(tournamentData!['difficulty'] ?? 'Medium'),
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: (tournamentData['gradient'][0] as Color).withOpacity(0.3),
+            color: _getGradientForDifficulty(tournamentData!['difficulty'] ?? 'Medium')[0].withOpacity(0.3),
             blurRadius: 20,
             spreadRadius: 2,
             offset: const Offset(0, 4),
@@ -319,7 +322,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            tournamentData['title'],
+            tournamentData!['title'] ?? 'Tournament',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -328,7 +331,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            tournamentData['startDate'],
+            _formatStartDate(tournamentData!['startDate']),
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
               fontSize: 16,
@@ -456,7 +459,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
           const SizedBox(height: 16),
           Center(
             child: Text(
-              '\$${tournamentData['prizePool'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+              '\$${(tournamentData!['prizePool'] ?? 0).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
               style: const TextStyle(
                 color: Color(0xFFF59E0B),
                 fontSize: 32,
@@ -476,56 +479,103 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
           ),
           const SizedBox(height: 20),
           Row(
-            children: tournamentData['prizes'].map<Widget>((prize) {
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: prize['color'].withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: prize['color'].withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        prize['icon'],
-                        color: prize['color'],
-                        size: 24,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '\$${prize['amount'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-                        style: TextStyle(
-                          color: prize['color'],
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        prize['position'],
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 10,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+            children: _buildPrizeWidgets(),
           ),
         ],
       ),
     );
   }
 
+  List<Widget> _buildPrizeWidgets() {
+    final prizes = tournamentData!['prizes'];
+    if (prizes == null) {
+      // Create default prizes based on prizePool
+      final prizePool = tournamentData!['prizePool'] ?? 0;
+      final firstPrize = ((tournamentData!['prizes']?['first'] ?? 50) / 100 * prizePool).round();
+      final secondPrize = ((tournamentData!['prizes']?['second'] ?? 30) / 100 * prizePool).round();
+      final thirdPrize = ((tournamentData!['prizes']?['third'] ?? 20) / 100 * prizePool).round();
+      
+      return [
+        _buildPrizeItem('1st Place', firstPrize, const Color(0xFFFFD700), Icons.looks_one),
+        _buildPrizeItem('2nd Place', secondPrize, const Color(0xFFC0C0C0), Icons.looks_two),
+        _buildPrizeItem('3rd Place', thirdPrize, const Color(0xFFCD7F32), Icons.looks_3),
+      ];
+    }
+    
+    // If prizes is a map with first/second/third percentages
+    if (prizes is Map && prizes.containsKey('first')) {
+      final prizePool = tournamentData!['prizePool'] ?? 0;
+      final firstPrize = ((prizes['first'] ?? 50) / 100 * prizePool).round();
+      final secondPrize = ((prizes['second'] ?? 30) / 100 * prizePool).round();
+      final thirdPrize = ((prizes['third'] ?? 20) / 100 * prizePool).round();
+      
+      return [
+        _buildPrizeItem('1st Place', firstPrize, const Color(0xFFFFD700), Icons.looks_one),
+        _buildPrizeItem('2nd Place', secondPrize, const Color(0xFFC0C0C0), Icons.looks_two),
+        _buildPrizeItem('3rd Place', thirdPrize, const Color(0xFFCD7F32), Icons.looks_3),
+      ];
+    }
+    
+    // If prizes is a list (legacy format)
+    if (prizes is List) {
+      return prizes.map<Widget>((prize) {
+        return _buildPrizeItem(
+          prize['position'] ?? 'Prize',
+          prize['amount'] ?? 0,
+          prize['color'] ?? const Color(0xFFFFD700),
+          prize['icon'] ?? Icons.emoji_events,
+        );
+      }).toList();
+    }
+    
+    return [];
+  }
+
+  Widget _buildPrizeItem(String position, int amount, Color color, IconData icon) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '\$${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+              style: TextStyle(
+                color: color,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              position,
+              style: TextStyle(
+                color: color.withOpacity(0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildParticipants() {
-    final participants = tournamentData['participants_list'];
-    final totalParticipants = tournamentData['participants'];
-    final maxParticipants = tournamentData['maxParticipants'];
+    final participants = tournamentData!['subscribers'] ?? [];
+    final totalParticipants = tournamentData!['participants'] ?? 0;
+    final maxParticipants = tournamentData!['maxParticipants'] ?? 100;
     final percentage = (totalParticipants / maxParticipants * 100).round();
 
     return Container(
@@ -751,7 +801,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
             ],
           ),
           const SizedBox(height: 16),
-          ...tournamentData['rules'].map<Widget>((rule) => _buildRuleItem(rule)).toList(),
+          ..._buildRulesList(),
         ],
       ),
     );
@@ -892,23 +942,86 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen>
       _isJoining = true;
     });
 
-    // Simulate joining tournament
-    await Future.delayed(const Duration(seconds: 2));
+    // Join tournament using Firebase
+    final success = await _tournamentService.joinTournament(widget.tournamentId);
 
     if (mounted) {
       setState(() {
         _isJoining = false;
-        _isJoined = true;
+        _isJoined = success;
       });
       
-      Get.snackbar(
-        'Success!',
-        'You have joined the tournament successfully!',
-        backgroundColor: const Color(0xFF10B981),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
+      if (success) {
+        // Reload tournament data to update participant count
+        await _loadTournamentData();
+      }
     }
+  }
+
+  List<Color> _getGradientForDifficulty(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return [const Color(0xFF10B981), const Color(0xFF06B6D4)];
+      case 'medium':
+        return [const Color(0xFF3B82F6), const Color(0xFF06B6D4)];
+      case 'hard':
+        return [const Color(0xFF8B5CF6), const Color(0xFFEC4899)];
+      case 'expert':
+        return [const Color(0xFFEF4444), const Color(0xFFF59E0B)];
+      default:
+        return [const Color(0xFF3B82F6), const Color(0xFF06B6D4)];
+    }
+  }
+
+  String _formatStartDate(dynamic startDate) {
+    if (startDate == null) return 'TBD';
+    if (startDate is String) {
+      try {
+        final date = DateTime.parse(startDate);
+        return 'Starts ${_formatDate(date)}';
+      } catch (e) {
+        return startDate;
+      }
+    }
+    return startDate.toString();
+  }
+
+  String _formatDate(DateTime date) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  List<Widget> _buildRulesList() {
+    final rules = tournamentData!['rules'];
+    if (rules == null) {
+      // Create default rules
+      return [
+        _buildRuleItem({
+          'title': 'Duration',
+          'description': '${tournamentData!['duration'] ?? 3} Hours',
+          'subtitle': 'You have time to complete all problems.',
+          'icon': Icons.schedule,
+        }),
+        _buildRuleItem({
+          'title': 'Language',
+          'description': tournamentData!['language'] ?? 'Any',
+          'subtitle': 'Use your preferred programming language.',
+          'icon': Icons.code,
+        }),
+        _buildRuleItem({
+          'title': 'Difficulty',
+          'description': tournamentData!['difficulty'] ?? 'Medium',
+          'subtitle': 'Problems range in difficulty level.',
+          'icon': Icons.trending_up,
+        }),
+      ];
+    }
+    
+    if (rules is List) {
+      return rules.map<Widget>((rule) => _buildRuleItem(rule)).toList();
+    }
+    
+    return [];
   }
 }

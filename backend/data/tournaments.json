@@ -1,0 +1,230 @@
+{
+  "tournaments": [
+    {
+      "id": 1,
+      "title": "Algorithm Sprint",
+      "subtitle": "Weekly coding challenge",
+      "startDate": "2024-11-15T10:00",
+      "duration": 3,
+      "prizePool": 5000,
+      "maxParticipants": 200,
+      "participants": 128,
+      "difficulty": "Medium",
+      "language": "Any",
+      "status": "open",
+      "description": "Test your algorithmic skills in this weekly challenge.",
+      "rules": [
+        "Duration: 3 Hours",
+        "Language: Any programming language allowed",
+        "Scoring: Speed + Accuracy",
+        "Difficulty: Easy to Hard problems"
+      ],
+      "prizes": {
+        "first": 2500,
+        "second": 1500,
+        "third": 1000
+      },
+      "gradient": [
+        "#3B82F6",
+        "#06B6D4"
+      ],
+      "icon": "speed",
+      "timeLeft": {
+        "days": 2,
+        "hours": 14,
+        "minutes": 37,
+        "seconds": 42
+      },
+      "participants_list": [
+        {
+          "name": "CodeMaster",
+          "rank": 2847,
+          "level": 12,
+          "avatar": "👨‍💻",
+          "badge": 1
+        },
+        {
+          "name": "AlgoQueen",
+          "rank": 1653,
+          "level": 15,
+          "avatar": "👩‍💻",
+          "badge": 2
+        },
+        {
+          "name": "ByteNinja",
+          "rank": 892,
+          "level": 18,
+          "avatar": "🥷",
+          "badge": 3
+        }
+      ],
+      "createdAt": "2025-07-12T05:10:22.565Z",
+      "updatedAt": "2025-07-12T05:10:22.565Z"
+    },
+    {
+      "id": 2,
+      "title": "Data Structure Masters",
+      "subtitle": "Advanced DS challenges",
+      "startDate": "2024-11-20T14:00",
+      "duration": 4,
+      "prizePool": 8000,
+      "maxParticipants": 150,
+      "participants": 89,
+      "difficulty": "Hard",
+      "language": "C++/Java",
+      "status": "open",
+      "description": "Master complex data structures and algorithms.",
+      "rules": [
+        "Duration: 4 Hours",
+        "Language: C++ or Java only",
+        "Scoring: Based on time complexity and correctness",
+        "Difficulty: Medium to Hard problems"
+      ],
+      "prizes": {
+        "first": 4000,
+        "second": 2500,
+        "third": 1500
+      },
+      "gradient": [
+        "#8B5CF6",
+        "#EC4899"
+      ],
+      "icon": "account_tree",
+      "timeLeft": {
+        "days": 7,
+        "hours": 8,
+        "minutes": 23,
+        "seconds": 15
+      },
+      "participants_list": [
+        {
+          "name": "TreeMaster",
+          "rank": 1234,
+          "level": 20
+        },
+        {
+          "name": "GraphGuru",
+          "rank": 567,
+          "level": 22
+        },
+        {
+          "name": "HashHero",
+          "rank": 2341,
+          "level": 16
+        }
+      ],
+      "createdAt": "2025-07-12T05:10:22.565Z",
+      "updatedAt": "2025-07-12T05:10:22.565Z"
+    },
+    {
+      "id": 3,
+      "title": "Web Dev Championship",
+      "subtitle": "Full-stack challenge",
+      "startDate": "2024-11-25T09:00",
+      "duration": 6,
+      "prizePool": 12000,
+      "maxParticipants": 300,
+      "participants": 156,
+      "difficulty": "Expert",
+      "language": "JavaScript",
+      "status": "open",
+      "description": "Build a complete web application in 6 hours.",
+      "rules": [
+        "Duration: 6 Hours",
+        "Language: JavaScript (React/Node.js)",
+        "Scoring: Functionality + Design + Performance",
+        "Must deploy to live server"
+      ],
+      "prizes": {
+        "first": 6000,
+        "second": 4000,
+        "third": 2000
+      },
+      "gradient": [
+        "#10B981",
+        "#06B6D4"
+      ],
+      "icon": "web",
+      "timeLeft": {
+        "days": 12,
+        "hours": 5,
+        "minutes": 41,
+        "seconds": 28
+      },
+      "participants_list": [
+        {
+          "name": "ReactRanger",
+          "rank": 445,
+          "level": 25
+        },
+        {
+          "name": "NodeNinja",
+          "rank": 1123,
+          "level": 19
+        },
+        {
+          "name": "VueVirtuoso",
+          "rank": 778,
+          "level": 21
+        }
+      ],
+      "createdAt": "2025-07-12T05:10:22.565Z",
+      "updatedAt": "2025-07-12T05:10:22.565Z"
+    },
+    {
+      "id": 4,
+      "title": "Mobile Dev Battle",
+      "subtitle": "Cross-platform coding",
+      "startDate": "2024-12-01T16:00",
+      "duration": 8,
+      "prizePool": 15000,
+      "maxParticipants": 250,
+      "participants": 67,
+      "difficulty": "Expert",
+      "language": "Flutter/React Native",
+      "status": "registration",
+      "description": "Create amazing mobile apps in this epic showdown.",
+      "rules": [
+        "Duration: 8 Hours",
+        "Language: Flutter or React Native",
+        "Scoring: Functionality + UI/UX + Performance",
+        "Must work on both iOS and Android"
+      ],
+      "prizes": {
+        "first": 7500,
+        "second": 5000,
+        "third": 2500
+      },
+      "gradient": [
+        "#EF4444",
+        "#F59E0B"
+      ],
+      "icon": "phone_android",
+      "timeLeft": {
+        "days": 18,
+        "hours": 12,
+        "minutes": 15,
+        "seconds": 7
+      },
+      "participants_list": [
+        {
+          "name": "FlutterFly",
+          "rank": 223,
+          "level": 28
+        },
+        {
+          "name": "ReactRocket",
+          "rank": 334,
+          "level": 26
+        },
+        {
+          "name": "DartDevil",
+          "rank": 156,
+          "level": 30
+        }
+      ],
+      "createdAt": "2025-07-12T05:10:22.566Z",
+      "updatedAt": "2025-07-12T05:10:22.566Z"
+    }
+  ]
+}

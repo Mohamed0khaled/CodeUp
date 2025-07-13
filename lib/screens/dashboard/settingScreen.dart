@@ -239,7 +239,6 @@ class _SettingsPageState extends State<SettingsPage>
           scale: 0.8 + (0.2 * value),
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -250,7 +249,7 @@ class _SettingsPageState extends State<SettingsPage>
                   Colors.cyan.withOpacity(0.1),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: Colors.cyan.withOpacity(0.3),
               ),
@@ -262,151 +261,261 @@ class _SettingsPageState extends State<SettingsPage>
                 ),
               ],
             ),
-            child: Row(
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Colors.cyan, Colors.purple],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.cyan.withOpacity(0.4),
-                            blurRadius: 15,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Obx(() => ProfileImageWidget(
-                        imageUrl: userService.bestProfileImageUrl,
-                        fallbackText: userService.displayName,
-                        size: 76, // Slightly smaller to account for gradient border
-                        borderWidth: 0, // No border since container has gradient
-                        backgroundColor: Colors.transparent,
-                        textColor: Colors.white,
-                        fontSize: 32,
-                        loadingIndicatorColor: Colors.cyan,
-                        onTap: () {
-                          _showImageUpdateDialog();
-                        },
-                      )),
-                    ),
-                    if (userService.currentUser?.isVerified == true)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFF0A0A0F),
-                              width: 3,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.verified,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(() => Text(
-                        userService.displayName,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Orbitron',
-                          shadows: [
-                            Shadow(
-                              color: Colors.cyan.withOpacity(0.5),
-                              blurRadius: 5,
-                            ),
-                          ],
-                        ),
-                      )),
-                      const SizedBox(height: 8),
-                      Obx(() => Row(
-                        children: [
-                          if (userService.currentUser?.isPremiumUser == true)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.amber),
-                              ),
-                              child: const Text(
-                                'PRO',
-                                style: TextStyle(
-                                  color: Colors.amber,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          if (userService.currentUser?.isPremiumUser == true) const SizedBox(width: 8),
-                          Text(
-                            userService.userLevel,
-                            style: TextStyle(
-                              color: Colors.green[400],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      )),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    _showEditProfileDialog();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.blue, Colors.purple],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
-                          blurRadius: 8,
-                        ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Responsive layout based on available width
+                final isWideScreen = constraints.maxWidth > 400;
+                
+                if (isWideScreen) {
+                  // Wide screen layout - horizontal
+                  return Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        _buildProfileImage(),
+                        const SizedBox(width: 20),
+                        Expanded(child: _buildProfileInfo()),
+                        const SizedBox(width: 16),
+                        _buildEditButton(),
                       ],
                     ),
-                    child: const Text(
-                      'Edit Profile',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  );
+                } else {
+                  // Narrow screen layout - vertical
+                  return Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildProfileImage(),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildProfileInfo()),
+                          ],
+                        ),
+                        
+                      ],
                     ),
-                  ),
-                ),
-              ],
+                  );
+                }
+              },
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildProfileImage() {
+    return Stack(
+      children: [
+        Container(
+          width: 90,
+          height: 90,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Colors.cyan, Colors.purple],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.cyan.withOpacity(0.4),
+                blurRadius: 15,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Obx(() => ProfileImageWidget(
+            imageUrl: userService.bestProfileImageUrl,
+            fallbackText: userService.displayName,
+            size: 86, // Slightly smaller to account for gradient border
+            borderWidth: 0, // No border since container has gradient
+            backgroundColor: Colors.transparent,
+            textColor: Colors.white,
+            fontSize: 36,
+            loadingIndicatorColor: Colors.cyan,
+            onTap: () {
+              _showImageUpdateDialog();
+            },
+          )),
+        ),
+        if (userService.currentUser?.isVerified == true)
+          Positioned(
+            right: 2,
+            bottom: 5,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF0A0A0F),
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.verified,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildProfileInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Obx(() => Text(
+          userService.displayName,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Orbitron',
+            shadows: [
+              Shadow(
+                color: Colors.cyan.withOpacity(0.5),
+                blurRadius: 5,
+              ),
+            ],
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        )),
+        const SizedBox(height: 12),
+        Obx(() => Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            if (userService.currentUser?.isPremiumUser == true)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.amber, Colors.orange],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  'PRO',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.green, Colors.teal],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Text(
+                userService.userLevel,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue, Colors.indigo],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Text(
+                '${userService.xpPoints} XP',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )),
+            _buildEditButton(),
+            
+          ],
+        )),
+        
+      ],
+    );
+  }
+
+  Widget _buildEditButton() {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        _showEditProfileDialog();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Colors.blue, Colors.purple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.4),
+              blurRadius: 12,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.edit,
+              color: Colors.white,
+              size: 18,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

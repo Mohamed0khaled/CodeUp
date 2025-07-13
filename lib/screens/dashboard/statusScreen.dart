@@ -103,6 +103,12 @@ class _StatusPageState extends State<StatusPage>
     super.dispose();
   }
 
+  String _getFirstName(String fullName) {
+    if (fullName.isEmpty) return fullName;
+    final spaceIndex = fullName.indexOf(' ');
+    return spaceIndex != -1 ? fullName.substring(0, spaceIndex) : fullName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -275,7 +281,7 @@ class _StatusPageState extends State<StatusPage>
           ),
           const SizedBox(height: 24),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _isLoading 
                 ? [
                     const SizedBox(width: 70, height: 70, child: CircularProgressIndicator(color: Colors.amber, strokeWidth: 2)),
@@ -284,7 +290,7 @@ class _StatusPageState extends State<StatusPage>
                   ]
                 : [
                     if (_globalLeaderboard.length > 1) _buildChampionItem(
-                      _globalLeaderboard[1]['displayName'] ?? _globalLeaderboard[1]['username'] ?? 'Player', 
+                      _getFirstName(_globalLeaderboard[1]['displayName'] ?? _globalLeaderboard[1]['username'] ?? 'Player'), 
                       '${_globalLeaderboard[1]['xpPoints']}', 
                       2, 
                       const Color(0xFF64748B),
@@ -293,7 +299,7 @@ class _StatusPageState extends State<StatusPage>
                           : _globalLeaderboard[1]['profileImageUrl'],
                     ) else _buildChampionItem('Player 2', '0', 2, const Color(0xFF64748B)),
                     if (_globalLeaderboard.isNotEmpty) _buildChampionItem(
-                      _globalLeaderboard[0]['displayName'] ?? _globalLeaderboard[0]['username'] ?? 'Player', 
+                      _getFirstName(_globalLeaderboard[0]['displayName'] ?? _globalLeaderboard[0]['username'] ?? 'Player'), 
                       '${_globalLeaderboard[0]['xpPoints']}', 
                       1, 
                       Colors.amber,
@@ -302,7 +308,7 @@ class _StatusPageState extends State<StatusPage>
                           : _globalLeaderboard[0]['profileImageUrl'],
                     ) else _buildChampionItem('Player 1', '0', 1, Colors.amber),
                     if (_globalLeaderboard.length > 2) _buildChampionItem(
-                      _globalLeaderboard[2]['displayName'] ?? _globalLeaderboard[2]['username'] ?? 'Player', 
+                      _getFirstName(_globalLeaderboard[2]['displayName'] ?? _globalLeaderboard[2]['username'] ?? 'Player'), 
                       '${_globalLeaderboard[2]['xpPoints']}', 
                       3, 
                       const Color(0xFFCD7F32),
@@ -326,104 +332,117 @@ class _StatusPageState extends State<StatusPage>
         builder: (context, value, child) {
           return Transform.scale(
             scale: 0.8 + (0.2 * value),
-            child: Column(
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.all(5),
-                      width: rank == 1 ? 80 : 70,
-                      height: rank == 1 ? 80 : 70,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: rank == 1 
-                              ? [Colors.amber, Colors.orange]
-                              : rank == 2
-                                  ? [const Color(0xFF64748B), const Color(0xFF475569)]
-                                  : [const Color(0xFFCD7F32), const Color(0xFFA0522D)],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: color.withOpacity(0.4),
-                            blurRadius: 5,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: ProfileImageWidget(
-                          imageUrl: profileImageUrl,
-                          fallbackText: name,
-                          size: rank == 1 ? 80 : 70,
-                          borderWidth: 0,
-                          backgroundColor: Colors.transparent,
-                          textColor: Colors.white,
-                          fontSize: rank == 1 ? 28 : 24,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: -5,
-                      right: rank == 1 ? -5 : 0,
-                      child: Container(
-                        width: rank == 1 ? 30 : 25,
-                        height: rank == 1 ? 30 : 25,
+            child: SizedBox(
+              width: rank == 1 ? 85 : 75, // Reduced fixed width for each champion item
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(5),
+                        width: rank == 1 ? 80 : 70,
+                        height: rank == 1 ? 80 : 70,
                         decoration: BoxDecoration(
-                          color: color,
+                          gradient: LinearGradient(
+                            colors: rank == 1 
+                                ? [Colors.amber, Colors.orange]
+                                : rank == 2
+                                    ? [const Color(0xFF64748B), const Color(0xFF475569)]
+                                    : [const Color(0xFFCD7F32), const Color(0xFFA0522D)],
+                          ),
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFF0A0E1A),
-                            width: 2,
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withOpacity(0.4),
+                              blurRadius: 5,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: ProfileImageWidget(
+                            imageUrl: profileImageUrl,
+                            fallbackText: name,
+                            size: rank == 1 ? 80 : 70,
+                            borderWidth: 0,
+                            backgroundColor: Colors.transparent,
+                            textColor: Colors.white,
+                            fontSize: rank == 1 ? 28 : 24,
                           ),
                         ),
-                        child: Center(
-                          child: rank == 1
-                              ? const Icon(
-                                  Icons.crop,
-                                  color: Colors.white,
-                                  size: 16,
-                                )
-                              : Text(
-                                  '$rank',
-                                  style: const TextStyle(
+                      ),
+                      Positioned(
+                        top: -5,
+                        right: rank == 1 ? -5 : 0,
+                        child: Container(
+                          width: rank == 1 ? 30 : 25,
+                          height: rank == 1 ? 30 : 25,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(0xFF0A0E1A),
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: rank == 1
+                                ? const Icon(
+                                    Icons.crop,
                                     color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                    size: 16,
+                                  )
+                                : Text(
+                                    '$rank',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Fixed height container for name to prevent layout shifts
+                  SizedBox(
+                    height: 20, // Fixed height for name
+                    child: Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  points,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  Text(
+                    points,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text(
-                  'points',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 12,
+                  Text(
+                    'points',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

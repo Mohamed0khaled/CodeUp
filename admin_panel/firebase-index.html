@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase configuration - updated with correct web app config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYwnVWpRfmtC16xji-4opY2enU45jOP6g",
+            authDomain: "codeup-1e29c.firebaseapp.com",
+            projectId: "codeup-1e29c",
+            storageBucket: "codeup-1e29c.firebasestorage.app",
+            messagingSenderId: "538015548724",
+            appId: "1:538015548724:web:0442f8eb2f1af157101161",
+            measurementId: "G-CKK1NWQ545"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make available globally
+        window.db = db;
+    </script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-trophy"></i> Tournament Admin</h2>
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#" class="menu-item active" data-section="dashboard">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="menu-item" data-section="tournaments">
+                            <i class="fas fa-trophy"></i>
+                            <span>Tournaments</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="menu-item" data-section="participants">
+                            <i class="fas fa-users"></i>
+                            <span>Participants</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="menu-item" data-section="analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="addTournamentBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Tournament
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalTournaments">0</h3>
+                            <p>Total Tournaments</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalParticipants">0</h3>
+                            <p>Total Participants</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalPrizePool">$0</h3>
+                            <p>Total Prize Pool</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="activeTournaments">0</h3>
+                            <p>Active Tournaments</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-tournaments">
+                    <h3>Recent Tournaments</h3>
+                    <div class="tournament-list" id="recentTournamentsList">
+                        <!-- Recent tournaments will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tournaments Section -->
+            <section id="tournaments" class="content-section">
+                <div class="tournaments-header">
+                    <div class="search-filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="tournamentSearch" placeholder="Search tournaments...">
+                        </div>
+                        <select id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tournaments-grid" id="tournamentsGrid">
+                    <!-- Tournament cards will be loaded here -->
+                </div>
+
+                <div class="pagination">
+                    <button id="prevPage" class="btn btn-secondary">
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                    <div class="page-numbers" id="pageNumbers">
+                        <!-- Page numbers will be generated here -->
+                    </div>
+                    <button id="nextPage" class="btn btn-secondary">
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Participants Section -->
+            <section id="participants" class="content-section">
+                <h2>Participants Management</h2>
+                <p>Coming soon...</p>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="content-section">
+                <h2>Analytics Dashboard</h2>
+                <p>Coming soon...</p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Tournament Modal -->
+    <div id="tournamentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Tournament</h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="tournamentForm" class="tournament-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tournamentTitle">Title</label>
+                        <input type="text" id="tournamentTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tournamentSubtitle">Subtitle</label>
+                        <input type="text" id="tournamentSubtitle" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="datetime-local" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration (hours)</label>
+                        <input type="number" id="duration" min="1" max="24" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prizePool">Prize Pool ($)</label>
+                        <input type="number" id="prizePool" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxParticipants">Max Participants</label>
+                        <input type="number" id="maxParticipants" min="1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty</label>
+                        <select id="difficulty" required>
+                            <option value="">Select Difficulty</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Expert">Expert</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Programming Language</label>
+                        <input type="text" id="language" placeholder="e.g., Any, Python, JavaScript" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="rules">Rules (one per line)</label>
+                    <textarea id="rules" rows="4" placeholder="Enter each rule on a new line"></textarea>
+                </div>
+
+                <div class="prize-distribution">
+                    <h4>Prize Distribution (%)</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstPrize">1st Place (%)</label>
+                            <input type="number" id="firstPrize" min="0" max="100" value="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="secondPrize">2nd Place (%)</label>
+                            <input type="number" id="secondPrize" min="0" max="100" value="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="thirdPrize">3rd Place (%)</label>
+                            <input type="number" id="thirdPrize" min="0" max="100" value="20">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Tournament</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="confirmTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-actions">
+                <button id="confirmCancel" class="btn btn-secondary">Cancel</button>
+                <button id="confirmDelete" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-script.js"></script>
+</body>
+</html>
